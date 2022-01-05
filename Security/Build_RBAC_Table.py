@@ -1,3 +1,24 @@
+import pandas as pd
+import snowflake.connector
+import getpass as pwd
+
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth',None)
+
+default_warehouse = 'PROD_ANALYTICS_WH'
+
+
+ctx = snowflake.connector.connect(
+    user='',
+    password='',
+    account=''
+    )
+
+build_rbac_table = '''
+
 Create or replace database ADMIN    Comment = 'The ADMIN database contains tables to support administration of Snowflake account ';
 Create schema SECOPS                Comment = 'SECOPS schema contains object supporting security operations in the account ';
 Grant usage on database ADMIN to useradmin;
@@ -86,3 +107,11 @@ VALUES
      ,('OWNERSHIP ON FUTURE FUNCTIONS IN',                          'SCHEMA', 'ROOT',           TRUE,  53)
      ,('OWNERSHIP ON FUTURE SEQUENCES IN',                          'SCHEMA', 'ROOT',           TRUE,  54)
      ,('OWNERSHIP ON FUTURE TASKS IN',                              'SCHEMA', 'ROOT',           TRUE,  55)
+
+'''
+
+print(build_rbac_table)
+exe_permission_matrix=  ctx.execute_string(f'USE ROLE ACCOUNTADMIN;{build_rbac_table}',remove_comments=True)
+for c in exe_permission_matrix:
+    for row in c :
+        print(row)
